@@ -17,13 +17,14 @@ buildscript {
 	}
 }
 
-plugins {
-	id 'org.springframework.boot' version '2.1.3.RELEASE'
-	id 'java'
-}
 
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'war'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+
 
 group = 'com.revolut'
 version = '0.0.1-SNAPSHOT'
@@ -81,6 +82,15 @@ task testReport(type: TestReport) {
 	reportOn test
 }
 
+apply from: 'gradle/docker.gradle'
+
+if (project.hasProperty('prod')) {
+	apply from: 'gradle/profile_prod.gradle'
+} else {
+	apply from: 'gradle/profile_dev.gradle'
+}
+
+
 task cleanResources(type: Delete) {
 	delete 'build/resources'
 }
@@ -119,11 +129,13 @@ dependencies {
 		exclude module: 'spring-boot-starter-tomcat'
 	}
 	compile "org.springframework.boot:spring-boot-starter-undertow"
+
+	// https://projectlombok.org
 	compileOnly 'org.projectlombok:lombok:1.18.6'
 	annotationProcessor 'org.projectlombok:lombok:1.18.6'
 
+
 	compile "mysql:mysql-connector-java"
-	annotationProcessor "org.hibernate:hibernate-jpamodelgen"
 	annotationProcessor ("org.springframework.boot:spring-boot-configuration-processor") {
 		exclude group: 'com.vaadin.external.google', module: 'android-json'
 	}
@@ -135,7 +147,6 @@ dependencies {
 	testCompile "org.assertj:assertj-core"
 	testCompile "junit:junit"
 	testCompile "org.mockito:mockito-core"
-	testCompile "com.mattbertolini:liquibase-slf4j"
 	testCompile "org.hamcrest:hamcrest-library"
 	testCompile "com.h2database:h2"
 }

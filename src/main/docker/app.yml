@@ -1,0 +1,14 @@
+version: '2'
+services:
+    revolut-app:
+        image: revolut-helloworld
+        ports:
+            - 8081:8081
+        environment:
+            - _JAVA_OPTIONS=-Xmx512m -Xms256m
+            - SPRING_PROFILES_ACTIVE=prod
+            - SPRING_DATASOURCE_URL=jdbc:mysql://revolut-mysql:3306/revolut?useUnicode=true&characterEncoding=utf8&useSSL=false
+    revolut-mysql:
+        extends:
+            file: mysql.yml
+            service: revolut-mysql
