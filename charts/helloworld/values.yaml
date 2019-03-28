@@ -1,0 +1,11 @@
+
+# Use Mysql stable chart values to configure your mysql cluster
+mysql:
+  enabled: true
+  mysqlDatabase: revolut
+  mysqlUser: prod
+  # Do not commit secrete with values file. Use tools like git-crypt to encrypt values.yaml
+  mysqlPassword: "dmu897$86K"
+
+helloworld:
+  replicas: "2"

@@ -39,7 +39,7 @@ public class UserResource {
      * @param userName the id of the user to retrieve
      * */
 
-    @PutMapping("/{userName:^[a-zA-Z]+$}")
+    @PutMapping("/{userName:[a-zA-Z]+}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void updateUser(@PathVariable ("userName") @Size(max = 10) String userName, @Valid  @RequestBody UserDTO userDTO) throws URISyntaxException {
 

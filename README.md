@@ -58,29 +58,28 @@ curl -X GET http://localhost:8081/hello/krish -H 'Content-Type: application/json
 ```
 
 
-Infrastructure
+# Infrastructure
+
+The serveice will be deplyed on Amazon EKS to incorporating scalability, stability, monitoring and disaster recovery.
+
+![EKS](images/EKS.png?raw=true "Infrastructure")
+
+## Prerequisites
+
+You need pre-provisioned EKS/GKE cluster
+
+`helm cli and tiller` should be installed. Instructions on installing `helm` can be referred at [https://github.com/helm/helm](https://github.com/helm/helm)
+
 
 ## Preparation
 
 You will need to push your image to a registry. If you have not done so, use the following commands to tag and push the images:
 
 ```
-$ docker push revolut
+$ docker tag revolut-helloworld <dockerhub_username>/revolut-helloworld
+$ docker push <dockerhub_username>/revolut-helloworld
 ```
-
-## Prerequisites
-
-`helm cli and tiller` should be installed. Instructions on installing `helm` can be referred at [https://github.com/helm/helm](https://github.com/helm/helm)
-
-Once, helm is installed, then you need to add the below repositories,
-```
-helm repo add stable https://kubernetes-charts.storage.googleapis.com
-helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com
-```
-These repos should be added to the local cache, because this sub-generator will pull some charts from these repos.
-
-This repo in turn uses `kubernets` sub-generator for the microservices manifests and few service like db, elk, prometheus etc. are referred from the above repos.
-
+NB: the latest images has been pushed to pkrishnath/revolut-helloworld
 
 ## Deployment
 
@@ -93,9 +92,22 @@ bash helm-apply.sh (or) ./helm-apply.sh
 `helm-apply.sh` will always do a clean install. Any of the existing charts with the same identity gets removed first and then it does a clean install.
 
 
-You can upgrade all your apps (if at all if you have made any changes to the generated manifests) by running the below bash command:
+You can upgrade all your apps  by running the below bash command:
 
 ```
 bash helm-upgrade.sh (or) ./helm-upgrade.sh
 ```
+
+## Accessing app from kubernetes cluster
+
+TODO: Ingress is not implemented
+
+You can use `kubectl port-forward` command to access your application from localhost
+
+eg: `kubectl port-forward service/revolut-helloworld-helloworld-revolut 8081:8081` and application can be access via localhost:8081
+
+
+
+
+
 

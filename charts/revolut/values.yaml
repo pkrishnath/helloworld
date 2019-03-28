@@ -1,4 +1,0 @@
-mysql:
-  enabled: true
-  mysqlDatabase: revolut
-  mysqlAllowEmptyPassword: true

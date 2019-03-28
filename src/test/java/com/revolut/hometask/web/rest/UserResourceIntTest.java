@@ -9,7 +9,6 @@ import com.revolut.hometask.dto.UserDTO;
 import com.revolut.hometask.repository.UserDAORepository;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -27,6 +26,7 @@ import javax.persistence.EntityManager;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 
@@ -126,11 +126,70 @@ public class UserResourceIntTest {
         assertThat(testUser.getDateOfBirth()).isEqualTo(DEFAULT_DOB);
     }
 
+    @Test
+    @Transactional
+    public void getNonExistingUser() throws Exception {
+        // Get the user
+        restUserMockMvc.perform(get("/hello/nouser", Long.MAX_VALUE))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Transactional
+    public void getUserWhosBirthdayIstoday() throws Exception {
+        // Initialize the database
+        UserDAO user = new UserDAO();
+        user.setUsername(DEFAULT_USERNAME);
+        user.setDateOfBirth(LocalDate.now());
+
+        userDAORepository.saveAndFlush(user);
+
+        String expectedResult = String.format("Hello, %s! Happy birthday!", DEFAULT_USERNAME);
+
+        // Get the user
+        restUserMockMvc.perform(get("/hello/"+DEFAULT_USERNAME))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("$.message").value(expectedResult));
+    }
+
+    @Test
+    @Transactional
+    public void getUserWhosBirthdayInNumberOfDays() throws Exception {
+        // Initialize the database
+        UserDAO user = new UserDAO();
+        user.setUsername(DEFAULT_USERNAME);
+
+        LocalDate birthday = LocalDate.of(1984,Month.APRIL,20);
+        user.setDateOfBirth(birthday);
+
+        userDAORepository.saveAndFlush(user);
+
+        String expectedResult = String.format("Hello, %s! Your birthday is in %s days(s)", DEFAULT_USERNAME,getBirthdayDays(birthday));
+
+        // Get the user
+        restUserMockMvc.perform(get("/hello/"+DEFAULT_USERNAME))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("$.message").value(expectedResult));
+    }
+
     private static ObjectMapper createObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         mapper.registerModule(new JavaTimeModule());
         return mapper;
+    }
+
+    private long getBirthdayDays(LocalDate birthday){
+
+        LocalDate today = LocalDate.now();
+        LocalDate nextBDay = birthday.withYear(today.getYear());
+
+        long days = ChronoUnit.DAYS.between(today, nextBDay);
+
+        return days;
+
     }
 
 }

@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: revolut
+  name: {{ template "fullname" . }}-revolut
   namespace: default
 spec:
-  replicas: 1
+  replicas: {{ .Values.helloworld.replicas }}
   selector:
     matchLabels:
-      app: revolut
+      app: {{ template "fullname" . }}-revolut
       version: "v1"
   template:
     metadata:
       labels:
-        app: revolut
+        app: {{ template "fullname" . }}-revolut
         version: "v1"
     spec:
       initContainers:
@@ -33,20 +33,19 @@ spec:
                   sleep 10
                 done
       containers:
-      - name: revolut-app
-        image: revolut
+      - name: revolut-helloworld
+        image: pkrishnath/revolut-helloworld
         env:
-        - name: SPRING_PROFILES_ACTIVE
-          value: prod
-        - name: JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: jwt-secret
-              key: secret
-        - name: SPRING_DATASOURCE_URL
-          value: jdbc:mysql://revolut-mysql.default.svc.cluster.local:3306/revolut?useUnicode=true&characterEncoding=utf8&useSSL=false
-        - name: JAVA_OPTS
-          value: " -Xmx256m -Xms256m"
+          - name: SPRING_PROFILES_ACTIVE
+            value: prod
+          - name: SPRING_DATASOURCE_URL
+            value: jdbc:mysql://revolut-mysql:3306/{{ .Values.mysql.mysqlDatabase }}?useUnicode=true&characterEncoding=utf8&useSSL=false
+          - name: SPRING_DATASOURCE_USERNAME
+            value: {{ .Values.mysql.mysqlUser }}
+          - name: SPRING_DATASOURCE_PASSWORD
+            value: {{ .Values.mysql.mysqlPassword }}
+          - name: JAVA_OPTS
+            value: " -Xmx256m -Xms256m"
         resources:
           requests:
             memory: "256Mi"
